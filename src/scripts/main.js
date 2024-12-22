@@ -1,51 +1,77 @@
 'use strict';
 
-function convertToNumber(value) {
-  return Number(value);
+function convertToNumber(salary) {
+  return Number(salary.replace(/[^0-9.-]+/g, ''));
 }
 
 // Функція для сортування списку за зарплатою в порядку спадання
 // eslint-disable-next-line no-shadow
 function sortList(list) {
-  // Отримуємо всі елементи списку
+  if (!(list instanceof HTMLElement) || !list.children.length) {
+    // eslint-disable-next-line no-console
+    console.error('Invalid list element provided or list has no children.');
+
+    return;
+  }
+
   const items = [...list.children];
 
-  // Сортуємо елементи за зарплатою в порядку спадання
   items.sort((a, b) => {
     const salaryA = convertToNumber(a.dataset.salary);
     const salaryB = convertToNumber(b.dataset.salary);
 
-    return salaryB - salaryA; // Спадання
+    return salaryB - salaryA;
   });
 
-  // Додаємо відсортовані елементи назад в список
   items.forEach((item) => list.appendChild(item));
 }
 
-// Функція для отримання масиву співробітників
 // eslint-disable-next-line no-shadow
 function getEmployees(list) {
+  if (!(list instanceof HTMLElement) || !list.children.length) {
+    // eslint-disable-next-line no-console
+    console.error('Invalid list element provided or list has no children.');
+
+    return [];
+  }
+
   const items = [...list.children];
 
-  return items.map((item) => {
-    return {
-      name: item.dataset.name,
-      position: item.dataset.position,
-      salary: convertToNumber(item.dataset.salary),
-      age: item.dataset.age,
-    };
-  });
+  return items
+    .map((item) => {
+      // eslint-disable-next-line no-shadow
+      const name = item.textContent.trim();
+      const position = item.dataset.position;
+      const salary = item.dataset.salary;
+      const age = item.dataset.age;
+
+      if (name && position && salary && age) {
+        return {
+          name,
+          position,
+          salary: convertToNumber(salary),
+          age,
+        };
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('Missing data attributes for item:', item);
+
+        return null;
+      }
+    })
+    .filter((item) => item !== null);
 }
 
-// Отримуємо список співробітників
 const list = document.querySelector('.employee-list');
 
-// Викликаємо функцію для сортування
-sortList(list);
+if (list) {
+  sortList(list);
 
-// Викликаємо функцію для отримання масиву співробітників
-const employees = getEmployees(list);
+  const employees = getEmployees(list);
 
-// Логуємо результат
-// eslint-disable-next-line no-console
-console.log(employees);
+  // eslint-disable-next-line no-console
+  console.log(employees);
+} else {
+  // eslint-disable-next-line no-console
+  console.error('List of employees not found.');
+}
